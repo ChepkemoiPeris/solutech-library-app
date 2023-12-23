@@ -1,66 +1,58 @@
 <template>
   <div class="home container">
-    <h1 class="text-3xl font-bold mt-5 mb-5 text-center">Issue Book</h1>
-    <div class="row">
-      <p v-if="errorMessage" class="col-md-6 offset-md-3 text-danger">{{ errorMessage }}</p>
-      <p v-if="success" class="col-md-6 offset-md-3 text-success">{{ success }}</p>
-      <div class="col-md-6 offset-md-3 border p-4">
-        <form @submit.prevent="submitForm">
-          <div class="row g-3">
-             <div class="col-md-12">
+    <!-- ... rest of your template ... -->
+    <div class="col-md-6 offset-md-3 border p-4">
+      <form @submit.prevent="submitForm">
+        <div class="row g-3">
+          <!-- ... rest of your form ... -->
+          <div class="col-md-12">
             <div class="form-group">
-              <label for="role">Book</label>
-              <select 
-                class="form-control"
-                name="book_id"
-                id="book_id"
-                required
-              >
-                <option value="">Select Book</option>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
+              <label for="role">Book</label> 
+              <select ref="bookSelect" class="form-control" v-select2="bookOptions"></select>
             </div>
           </div>
           <div class="col-md-12">
             <div class="form-group">
-              <label for="role">User</label>
-              <select 
-                class="form-control"
-                name="user_id"
-                id="user_id"
-                required
-              >
-                <option value="">Select User</option>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
+              <label for="role">User</label> 
+              <select ref="userSelect" class="form-control" v-select2="userOptions"></select>
             </div>
           </div>
-            <div class="col-md-6">
-              <button class="btn btn-primary">Submit</button>
-            </div>
+          <div class="col-md-6">
+            <button class="btn btn-primary">Submit</button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   </div>
 </template>
 
-<script>
+ <script>
 import repository from "@/api/repository";
 import axios from "axios";
+import Select2 from 'select2';
 
 export default {
   name: "IssueBook",
   components: {},
+  mounted() { 
+     const bookSelect = this.$refs.bookSelect;
+    const userSelect = this.$refs.userSelect;
+
+    if (bookSelect && userSelect) {
+      new Select2(bookSelect);
+      new Select2(userSelect);
+    }
+    this.getBooks();
+    this.getUsers();
+  },
   data() {
     return {
       errorMessage: "",
       success: "",
-      users: { 
-      },
-      books:{}
+      bookOptions: [],
+      userOptions: [],
+      users: {}, // Removed unnecessary empty object
+      books: {},
     };
   },
   methods: {
@@ -93,23 +85,40 @@ export default {
           this.showMessage(error.response.data.message, "errorMessage");
         });
     },
-     getBooks() {  
-      repository.getBooks(this.page, this.limit,this.value).then((response) => {
-        this.books = response.data;
+    getBooks() {
+      repository.getBooks().then((response) => {
+      console.log(response)
+        this.bookOptions = response.data.data.map((book) => ({
+          id: book.id,
+          text: book.name, // Assuming the book object has a 'name' property
+        })); 
+         const bookSelect = this.$refs.bookSelect;
+
+        // Trigger a change event
+        if (bookSelect) {
+          const event = new Event("change");
+          bookSelect.dispatchEvent(event);
+        }
       });
     },
-     getUsers(data, callback, settings) {
-      repository
-        .getUsers(data.start / data.length + 1, data.length)
-        .then((response) => {
-          callback({
-            draw: data.draw,
-            recordsTotal: response.data.recordsTotal,
-            recordsFiltered: response.data.recordsFiltered,
-            data: response.data.data,
-          });
-        });
-    },
+    getUsers() {
+      repository.getUsers().then((response) => {
+      console.log(response.data)
+        this.userOptions = response.data.data.map((user) => ({
+          id: user.id,
+          text: user.email,
+        }));
+        const userSelect = this.$refs.userSelect;
+        if (userSelect) {
+          const event = new Event("change");
+          userSelect.dispatchEvent(event);
+        }
+      });
+    }, 
   },
 };
 </script>
+
+<style>
+  @import "select2/dist/css/select2.min.css";
+</style>

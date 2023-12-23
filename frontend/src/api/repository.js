@@ -33,9 +33,15 @@ export default {
     return api.post(`${backendUrl}/api/auth/logout`);
   },
 
-  getBooks(page, limit,name) {
-    return api.get(`${backendUrl}/api/books?page=${page}&limit=${limit}&name=${name}`);
+  getBooks(page = 1, limit, name = "") {
+    let queryParams = `?page=${page}&name=${name}`;
+
+    if (limit !== undefined) {
+      queryParams += `&limit=${limit}`;
+    } 
+    return api.get(`${backendUrl}/api/books${queryParams}`);
   },
+  
   getIssuedBooks(page, limit,email){
     return api.get(`${backendUrl}/api/book_loans?page=${page}&limit=${limit}&email=${email}`);
   },
@@ -90,10 +96,11 @@ export default {
   approveBook(id) {
     return api.post(`${backendUrl}/api/book_loans/approve/` + id);
   },
-  getUsers(page, limit){
-    return api.get(`${backendUrl}/api/users?page=${page}&limit=${limit}`);
-  },
-
+  getUsers(page = 1, limit = 10){
+    const queryParams = `?page=${page}&limit=${limit}`;
+    return api.get(`${backendUrl}/api/users${queryParams}`); 
+  }, 
+  
   searchBooks(property, value) {
     return api.get(`${backendUrl}/api/books/search/${property}/${value}`);
   },
