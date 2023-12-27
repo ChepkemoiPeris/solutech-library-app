@@ -87,8 +87,7 @@ export default {
           this.showMessage(res.data.message, "success");
           this.resetForm();
         })
-        .catch((error) => {
-          console.log(error);
+        .catch((error) => { 
           this.showMessage(error.response.data.message, "errorMessage");
         });
     },

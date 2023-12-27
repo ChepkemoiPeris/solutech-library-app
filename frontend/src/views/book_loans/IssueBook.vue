@@ -1,124 +1,84 @@
 <template>
-  <div class="home container">
-    <!-- ... rest of your template ... -->
-    <div class="col-md-6 offset-md-3 border p-4">
-      <form @submit.prevent="submitForm">
-        <div class="row g-3">
-          <!-- ... rest of your form ... -->
-          <div class="col-md-12">
-            <div class="form-group">
-              <label for="role">Book</label> 
-              <select ref="bookSelect" class="form-control" v-select2="bookOptions"></select>
+    <div class="home container">
+    <h1 class="text-3xl font-bold mt-5 mb-5 text-center">Issue Book</h1>
+    <div class="row">
+      <p v-if="errorMessage" class="col-md-6 offset-md-3 text-danger">{{ errorMessage }}</p>
+      <p v-if="successMessage" class="col-md-6 offset-md-3 text-success">{{ successMessage }}</p>
+      <div class="col-md-6 offset-md-3 border p-4"> 
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="role">Book</label>
+                <v-select v-model="selectedBook" :options="bookOptions" label="text"></v-select>
+              </div>
             </div>
-          </div>
-          <div class="col-md-12">
-            <div class="form-group">
-              <label for="role">User</label> 
-              <select ref="userSelect" class="form-control" v-select2="userOptions"></select>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="role">User</label>
+                <v-select v-model="selectedUser" :options="userOptions" label="text"></v-select> 
+              </div>
+            </div> 
+            <div class="col-md-6">
+              <button class="btn btn-primary" @click="borrowBook(selectedBook.id, selectedUser.id)">Issue</button>
             </div>
-          </div>
-          <div class="col-md-6">
-            <button class="btn btn-primary">Submit</button>
-          </div>
-        </div>
-      </form>
+          </div> 
+      </div>
     </div>
-  </div>
-</template>
+  </div> 
+  </template>
 
- <script>
-import repository from "@/api/repository";
-import axios from "axios";
-import Select2 from 'select2';
+<script>
+import repository from "@/api/repository"; 
 
-export default {
-  name: "IssueBook",
-  components: {},
-  mounted() { 
-     const bookSelect = this.$refs.bookSelect;
-    const userSelect = this.$refs.userSelect;
-
-    if (bookSelect && userSelect) {
-      new Select2(bookSelect);
-      new Select2(userSelect);
-    }
+export default { 
+  mounted() {  
     this.getBooks();
     this.getUsers();
   },
   data() {
-    return {
-      errorMessage: "",
-      success: "",
+    return { 
       bookOptions: [],
       userOptions: [],
-      users: {}, // Removed unnecessary empty object
+      users: {},  
       books: {},
+      selectedBook: null,  
+      selectedUser: null, 
+      errorMessage: "",
+      successMessage: "",
     };
   },
   methods: {
-    showMessage(message, type) {
-      this[type] = message;
-      setTimeout(() => {
-        this[type] = "";
-      }, 5000);
-    }, 
-    submitForm() {
-      let formData = new FormData();
-      this.formFields.forEach((field) => {
-        formData.append(field.name, this.book[field.name]);
-      });
-      const token = localStorage.getItem("token");
-      const config = {
-        headers: {
-          "content-type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      axios
-        .post("http://localhost:8000/api/book/create", formData, config)
-        .then((res) => {
-          this.showMessage(res.data.message, "success");
-          this.resetForm();
-        })
-        .catch((error) => {
-          console.log(error);
-          this.showMessage(error.response.data.message, "errorMessage");
-        });
-    },
     getBooks() {
       repository.getBooks().then((response) => {
-      console.log(response)
-        this.bookOptions = response.data.data.map((book) => ({
-          id: book.id,
-          text: book.name, // Assuming the book object has a 'name' property
-        })); 
-         const bookSelect = this.$refs.bookSelect;
-
-        // Trigger a change event
-        if (bookSelect) {
-          const event = new Event("change");
-          bookSelect.dispatchEvent(event);
-        }
+        this.books = response.data.data; 
+       
+        this.bookOptions = response.data.data
+          .filter(book => !book.isBorrowed)
+          .map(book => ({
+            id: book.id,
+            text: `${book.name}-${book.isbn}`,
+          })); 
       });
     },
-    getUsers() {
+    getUsers() { 
       repository.getUsers().then((response) => {
-      console.log(response.data)
-        this.userOptions = response.data.data.map((user) => ({
+        this.users = response.data.data;
+        this.userOptions = response.data.data 
+        .map((user) => ({
           id: user.id,
           text: user.email,
-        }));
-        const userSelect = this.$refs.userSelect;
-        if (userSelect) {
-          const event = new Event("change");
-          userSelect.dispatchEvent(event);
-        }
+        })); 
       });
-    }, 
+    },
+    borrowBook(bookId, userId) { 
+      repository.borrowBook(bookId, userId,'borrowed').then((response) => { 
+        this.successMessage = 'Book issued successfully';
+        this.selectedBook = null;  
+        this.selectedUser = null; 
+      });
+    },
   },
 };
 </script>
 
-<style>
-  @import "select2/dist/css/select2.min.css";
-</style>
+ 

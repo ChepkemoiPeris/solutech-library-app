@@ -19,7 +19,7 @@ class BookLoanController extends Controller
         $page = $query['page'] ?? 1;
         $limit = $query['limit'] ?? 10;
 
-        $searchTerm = $query['email'] ?? null; // Change 'name' to 'email'
+        $searchTerm = $query['email'] ?? null;  
 
         Paginator::currentPageResolver(function () use ($page) {
             return $page;
@@ -29,7 +29,7 @@ class BookLoanController extends Controller
 
         if ($searchTerm) {
             $queryBuilder->whereHas('user', function ($query) use ($searchTerm) {
-                $query->where('email', 'like', "%{$searchTerm}%"); // Change 'name' to 'email'
+                $query->where('email', 'like', "%{$searchTerm}%"); 
             });
         }
 
@@ -41,36 +41,41 @@ class BookLoanController extends Controller
 
     public function store(Request $request, $book_id)
     {
-        $user_id = $request->input('user_id'); 
+        $user_id = $request->input('user_id');
+    
         if (!$user_id || !$book_id) {
             return response()->json(['error' => 'Supply required inputs'], Response::HTTP_CONFLICT);
         }
-         
+    
         $bookLoan = BookLoan::where('book_id', $book_id)
-        ->whereIn('status', ['borrowed', 'pending'])
-        ->first(); 
+            ->whereIn('status', ['borrowed', 'pending'])
+            ->first();
+    
         if ($bookLoan) {
             return response()->json(['error' => 'Book not available'], Response::HTTP_CONFLICT);
         }
-
+    
         $exists = Books::where('id', $request->book_id)->first();
         if (!$exists) {
-            return response(['message' => 'Book does not exists'], Response::HTTP_CONFLICT);
+            return response(['message' => 'Book does not exist'], Response::HTTP_CONFLICT);
         }
-        $validatedData = [];
-        $due_date = Carbon::now()->addWeek();
-
+     
+        $due_date = Carbon::now()->addWeek(); 
+        $status = $request->input('status', 'pending');
+    
         $validatedData = [
             'book_id' => $book_id,
             'user_id' => $user_id,
             'added_by' => Auth::id(),
-            'status' => 'pending',
+            'status' => $status,
             'due_date' => $due_date,
         ];
+    
         $book_loan = BookLoan::create($validatedData);
-
+    
         return response(['message' => 'Book pending approval'], Response::HTTP_OK);
     }
+    
 
     public function getBookDetails(string $id)
     {
@@ -78,6 +83,57 @@ class BookLoanController extends Controller
         $book->image_url = asset('storage/' . $book->image);
 
         return response()->json($book);
+    }
+    public function extendDueDate(string $id)
+    {
+        
+        $bookLoan = BookLoan::findOrFail($id); 
+        if (!$bookLoan) {
+            return response()->json(['error' => 'Book not available'], Response::HTTP_CONFLICT);
+        }
+        $dueDate = Carbon::parse($bookLoan->due_date);
+
+        $validatedData = [  
+            'extended' => true,
+            'extension_date' => $dueDate->addWeek()
+        ]; 
+    
+        $book_loan = $bookLoan->update($validatedData);
+    
+        return response(['message' => 'Extended to '.$dueDate], Response::HTTP_OK);
+    }
+    public function Penalty(Request $request, $id)
+    {
+        $bookLoan = BookLoan::findOrFail($id); 
+        if (!$bookLoan) {
+            return response()->json(['error' => 'Book not available'], Response::HTTP_CONFLICT);
+        }
+        $dueDate = Carbon::parse($bookLoan->due_date);
+
+        $validatedData = [  
+            'penalty_amount' => 500,
+            'penalty_status' => 'unpaid'
+        ]; 
+    
+        $book_loan = $bookLoan->update($validatedData);
+    
+        return response(['message' => 'Penalty set'], Response::HTTP_OK);
+    }
+    public function payPenalty(Request $request, $id)
+    {
+        $bookLoan = BookLoan::findOrFail($id); 
+        if (!$bookLoan) {
+            return response()->json(['error' => 'Book not available'], Response::HTTP_CONFLICT);
+        }
+        $dueDate = Carbon::parse($bookLoan->due_date);
+
+        $validatedData = [   
+            'penalty_status' => 'paid'
+        ]; 
+    
+        $book_loan = $bookLoan->update($validatedData);
+    
+        return response(['message' => 'Penalty paid'], Response::HTTP_OK);
     }
     public function approveBook(string $id)
     {
@@ -110,7 +166,7 @@ class BookLoanController extends Controller
             'sub_category' => 'required',
             'description' => 'required',
             'pages' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Adjust file types and size as needed
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',  
         ]);
         if ($request->hasFile('image')) {
             $image = $request->file('image');

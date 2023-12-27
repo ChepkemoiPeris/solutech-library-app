@@ -9,6 +9,7 @@ use App\Models\User;
 class BookLoan extends Model
 {
     use HasFactory;
+    
     protected $fillable = [
         'user_id', 
         'book_id',

@@ -36,13 +36,13 @@ class AuthController extends Controller
         return response($response, Response::HTTP_OK); 
         
     }
-
+ 
     public function login(Request $request)
     {
         $fields = $request->validate([
             'email' => 'required|string|max:255',
             'password' => 'required|string',
-        ]);
+        ]); 
  
         $user = User::where('email', $fields['email'])->first(); 
         if (!$user || !Hash::check($fields['password'], $user->password)) {

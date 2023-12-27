@@ -96,13 +96,11 @@ export default {
       };
       axios
         .post(`http://localhost:8000/api/book/update/` + id, formData, config)
-        .then((res) => {
-          console.log(res.data);
+        .then((res) => { 
           this.success = res.data.message;
           setTimeout(() => this.$router.push("/books"), 3000);
         })
-        .catch((error) => {
-          console.log(error);
+        .catch((error) => { 
           this.errorMessage = error.response.data.message;
         });
     },

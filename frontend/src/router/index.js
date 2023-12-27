@@ -8,6 +8,7 @@ import EditBook from '../views/books/EditBook.vue';
 import UsersView  from '../views/users/UsersView.vue';
 import AddUser  from '../views/users/AddUser.vue';
 import EditUser  from '../views/users/EditUser.vue';
+import ChangePassword from '../views/users/ChangePassword.vue';
 
 import IssuedBooks  from '../views/book_loans/IssuedBooks.vue';
 import IssueBook  from '../views/book_loans/IssueBook.vue';
@@ -69,6 +70,13 @@ const router = createRouter({
     name: "editUser",
     component: EditUser,
     beforeEnter: middleware.user,
+  },
+  {
+    path: "/user/change_password/:id",
+    name: "change_password",
+    component: ChangePassword,
+    beforeEnter: middleware.user,
+    
   },
   {
     path: "/books/issued",

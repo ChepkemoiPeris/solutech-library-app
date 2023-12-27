@@ -27,8 +27,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            // Indexes
-            $table->primary('id');
+            // Indexes 
             $table->index('user_id');
             $table->index('book_id');
 

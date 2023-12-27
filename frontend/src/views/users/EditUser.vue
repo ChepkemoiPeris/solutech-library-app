@@ -89,21 +89,21 @@ export default {
     mounted() { 
     let id = this.$route.params.id;
     repository.getUser(id).then((user) => {
-      this.user = user.data;
-      console.log(this.user)
+      this.user = user.data; 
     });
   },
   methods: {
     editUser() {
       repository
         .editUser(this.user)
-        .then((response) => {
-          if (response.data.token) {
+        .then((response) => { 
+          if (response.data) {
             this.success = "User updated successfully";
           } 
           setTimeout(() => (this.success = ""), 3000);
         })
         .catch((error) => {
+          console.log(error)
           this.errorMessage = error.response.data.message;
           setTimeout(() => (this.errorMessage = ""), 3000);
         });

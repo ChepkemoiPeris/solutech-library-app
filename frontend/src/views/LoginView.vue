@@ -53,8 +53,7 @@ export default {
         repository.setToken(response.data.token);
         this.reloadPage();
         this.$router.push("/books");
-      }) .catch((error) => { 
-      console.log(error)
+      }) .catch((error) => {  
       this.errorMessage = error.response.data.message;  
     });;
     },

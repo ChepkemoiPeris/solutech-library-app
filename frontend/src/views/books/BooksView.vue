@@ -270,7 +270,7 @@ export default {
           this.successMessage = "";
         }, 5000);
       });
-    },
+    }, 
     confirmDeleteBook(bookId) {
       this.bookToDelete = bookId;
     },

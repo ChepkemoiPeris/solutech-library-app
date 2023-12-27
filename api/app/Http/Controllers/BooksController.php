@@ -91,7 +91,7 @@ class BooksController extends Controller
 
     public function getBookDetails(string $id)
     {
-        $book = Books::with('bookLoan')->findOrFail($id);
+        $book = Books::with('bookLoan')->findOrFail($id); 
         $book->image_url = Storage::url($book->image);    
         return response()->json($book);
     }

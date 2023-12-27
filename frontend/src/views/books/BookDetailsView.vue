@@ -12,8 +12,7 @@
             alt="Book Image"
             class="mb-4 rounded-md w-full"
             style="max-height: 300px"
-          />
-
+          /> 
           <div class="mb-4">
             <strong>Name/Title:</strong>
             <span
@@ -106,8 +105,7 @@
         </div>
       </div>
     </div>
-
-    <!-- Delete confirmation modal -->
+ 
     <div
       class="modal fade"
       id="confirmDeleteModal"

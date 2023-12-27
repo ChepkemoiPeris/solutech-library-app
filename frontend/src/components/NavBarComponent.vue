@@ -10,7 +10,7 @@
     v-if="!isAuthenticated"
     class="font-bold text-white flex items-center space-x-5 flex-wrap bg-blue-500 p-6"
   >
-    <!-- Content for unauthenticated users -->
+   
   </div>
   <div v-else class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav ms-auto">
@@ -30,6 +30,10 @@
         <RouterLink class="nav-link mx-2" to="/users">Users</RouterLink>
       </li>
       <li class="nav-item">
+        <RouterLink class="nav-link mx-2" :to="`/user/change_password/${user_id}`">Change Password</RouterLink>
+
+       </li>
+      <li class="nav-item">
         <a class="nav-link mx-2 btn" @click="logout">Logout</a>
       </li>
     </ul>
@@ -48,13 +52,15 @@ export default {
   data() {
     return {
       isAuthenticated: false,
-      isAdmin:false
+      isAdmin:false,
+      user_id:"",
     };
   },
 
   mounted() {
     this.isAuthenticated = repository.isAuthenticated();
     this.isAdmin = repository.isAdmin();
+    this.user_id = JSON.parse(localStorage.getItem("user")).id
   },
 
   methods: {
