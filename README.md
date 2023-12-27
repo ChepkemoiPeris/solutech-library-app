@@ -69,11 +69,11 @@ npm run dev
 
 ## Sample login credentials:
 
-# Admin login credentials:
+### Admin login credentials:
 * Email : admin@admin.com
 * Password : admin123
 
-# User login credentials:
+### User login credentials:
 * Email : user@user.com
 * Password : 123456
 
